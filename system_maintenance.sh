@@ -1,14 +1,32 @@
 #!/bin/bash
-# 自動化維運腳本 (已整合 MySQL 自動認證)
 LOG_FILE="/var/log/my_project.log"
 BACKUP_DIR="/var/backups/wordpress"
 
-# 確保資料夾存在
-sudo mkdir -p $BACKUP_DIR
+sudo mkdir -p "$BACKUP_DIR"
 
-echo "[$(date)] 開始維護任務..." >> $LOG_FILE
+# 函數：記錄日誌
+log_message() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> $LOG_FILE
+}
 
-# 執行備份 (不需要 -p，系統會自動讀取 .my.cnf)
-mysqldump wordpress > $BACKUP_DIR/wp_backup_$(date +%Y%m%d).sql
+log_message "開始執行維護任務..."
 
-echo "[$(date)] 資料庫備份完成" >> $LOG_FILE
+# 1. 防呆機制：檢查磁碟空間是否充足 (若低於 10% 則發出警告)
+DISK_USAGE=$(df / | grep / | awk '{ print $5 }' | sed 's/%//')
+if [ "$DISK_USAGE" -gt 90 ]; then
+    log_message "警告：磁碟空間不足，目前使用率 $DISK_USAGE%"
+fi
+
+# 2. 執行資料庫備份並檢查成功與否
+if mysqldump wordpress > "$BACKUP_DIR/wp_backup_$(date +%Y%m%d).sql"; then
+    log_message "資料庫備份成功"
+else
+    log_message "錯誤：資料庫備份失敗！"
+    exit 1 # 終止腳本並回報錯誤
+fi
+
+# 3. 自動清除 30 天前的檔案
+find $BACKUP_DIR -type f -mtime +30 -name "*.sql" -delete
+log_message "舊備份已清除"
+
+log_message "維護工作成功完成。"
