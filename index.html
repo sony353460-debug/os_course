@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Nexus | 自動化維運平台</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 40px auto; padding: 40px; background: #ffffff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 15px; }
+        h2 { color: #2980b9; margin-top: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: #f8f9fa; padding: 20px; border-radius: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { background: #3498db; color: white; padding: 10px; text-align: left; }
+        td { padding: 10px; border-bottom: 1px solid #ddd; }
+        .btn { display: inline-block; padding: 15px 40px; background: #2c3e50; color: white; text-decoration: none; border-radius: 30px; font-weight: bold; margin-top: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Project Nexus: 自動化維運平台</h1>
+    <p style="font-size: 1.2em; color: #555;">OS 期末實作：整合式 LAMP Stack 與自動化維運架構</p>
+    
+    <section>
+        <h2>專案綜述</h2>
+        <p>本專案旨在解決傳統 Web 伺服器在維護上的痛點。我們透過自動化腳本實作了一套具備<strong>自我修復與資源管理</strong>功能的系統，確保 WordPress 服務能在最小化人力介入的情況下維持長期穩定運行。</p>
+    </section>
+
+    <section>
+        <h2>技術規格與達成</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>自動化維運 (Automation)</h3>
+                <ul>
+                    <li><strong>DB 備份：</strong> 每日自動化 MySQL dump。</li>
+                    <li><strong>空間管理：</strong> 整合 <code>find -mtime +30</code> 策略。</li>
+                    <li><strong>系統監控：</strong> 磁碟空間閾值預警 (90%)。</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>資安與部署 (Security)</h3>
+                <ul>
+                    <li><strong>權限治理：</strong> 符合最小權限原則。</li>
+                    <li><strong>Rewrite 模組：</strong> 乾淨且 SEO 友善的 URL。</li>
+                    <li><strong>環境一致性：</strong> 透過 Git 控制配置。</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>系統監控概覽</h2>
+        <table>
+            <tr><th>維運項目</th><th>當前狀態</th><th>備註</th></tr>
+            <tr><td>資料庫備份服務</td><td style="color: #27ae60;">● 運行中</td><td>每日 03:00</td></tr>
+            <tr><td>Log 清理機制</td><td style="color: #27ae60;">● 已啟用</td><td>30天週期</td></tr>
+            <tr><td>磁碟預警系統</td><td style="color: #27ae60;">● 監控中</td><td>閾值 90%</td></tr>
+        </table>
+    </section>
+
+    <div style="text-align: center;">
+        <a href="/index.php" class="btn">進入 WordPress 實例</a>
+    </div>
+</div>
+
+</body>
+</html>
