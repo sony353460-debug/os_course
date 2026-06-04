@@ -1,5 +1,18 @@
 #!/bin/bash
+setup_cron() {
+    local script_path="$(realpath "$0")"
+    local cron_job="0 3 * * * $script_path" # 設定為每天凌晨 3 點執行
 
+    # 檢查是否已經存在於 crontab
+    if crontab -l 2>/dev/null | grep -q "$script_path"; then
+        echo "[INFO] 自動排程已存在，跳過設定。"
+    else
+        echo "[INFO] 正在設定自動排程..."
+        (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
+        echo "[OK] 已成功設定每日凌晨 3 點自動執行維護。"
+    fi
+}
+setup_cron
 # --- 環境變數 ---
 # 確保這些目錄由當前使用者擁有
 LOG_DIR="$HOME/logs"
