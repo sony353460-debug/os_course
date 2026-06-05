@@ -1,23 +1,13 @@
 #!/bin/bash
-setup_cron() {
-    local script_path="$(realpath "$0")"
-    local cron_job="0 3 * * * $script_path" # 設定為每天凌晨 3 點執行
+set -euo pipefail
 
-    # 檢查是否已經存在於 crontab
-    if crontab -l 2>/dev/null | grep -q "$script_path"; then
-        echo "[INFO] 自動排程已存在，跳過設定。"
-    else
-        echo "[INFO] 正在設定自動排程..."
-        (crontab -l 2>/dev/null; echo "$cron_job") | crontab -
-        echo "[OK] 已成功設定每日凌晨 3 點自動執行維護。"
-    fi
-}
-setup_cron
 # --- 環境變數 ---
 # 確保這些目錄由當前使用者擁有
 LOG_DIR="$HOME/logs"
 BACKUP_DIR="$HOME/backups/wordpress"
 LOG_FILE="$LOG_DIR/maintenance.log"
+MYCNF="$HOME/.my.cnf"
+DB_NAME="$(awk -F= '/^database[ \t]*=/{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}' "$MYCNF" 2>/dev/null || true)"
 
 # 建立目錄 (若不存在)
 mkdir -p "$LOG_DIR" "$BACKUP_DIR"
@@ -29,8 +19,17 @@ log_message() {
 
 log_message "開始執行維護任務..."
 
+if [ ! -f "$MYCNF" ]; then
+    log_message "錯誤：找不到 $MYCNF，請先執行 install_lamp.sh 建立資料庫憑證。"
+    exit 1
+fi
+
+if [ -z "$DB_NAME" ]; then
+    DB_NAME="wordpress"
+fi
+
 # 1. 健康檢查：檢查磁碟空間
-DISK_USAGE=$(df / | grep / | awk '{ print $5 }' | sed 's/%//')
+DISK_USAGE=$(df -P / | awk 'NR==2 {gsub(/%/,"",$5); print $5}')
 if [ "$DISK_USAGE" -gt 90 ]; then
     log_message "警告：磁碟空間不足，目前使用率 ${DISK_USAGE}%"
 fi
@@ -40,7 +39,7 @@ fi
 # 請確保 ~/.my.cnf 權限為 600
 BACKUP_FILE="$BACKUP_DIR/wp_backup_$(date +%Y%m%d).sql"
 
-if mysqldump --defaults-extra-file="$HOME/.my.cnf" wordpress > "$BACKUP_FILE" 2>> "$LOG_FILE"; then
+if mysqldump --defaults-extra-file="$MYCNF" "$DB_NAME" > "$BACKUP_FILE" 2>> "$LOG_FILE"; then
     log_message "資料庫備份成功: $BACKUP_FILE"
 else
     log_message "錯誤：資料庫備份失敗！"
